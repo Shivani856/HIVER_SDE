@@ -1,0 +1,42 @@
+Is project ko run karne ke liye neeche diye gaye steps ko follow karein.
+
+IMPORTANT FIX: prepare_data.py, data_prep.py, aur eval.py — teeno ab apna
+project root khud dhoondh lete hain (jahan requirements.txt hai) aur data
+files (apple_conversations.csv, golden_set.csv, final_eval_results.json)
+hamesha usi root folder mein padhte/likhte hain. Isliye ab aap in scripts ko
+root se ya kisi bhi subfolder (jaise src/) se, jahan bhi woh files rakhi hon,
+chala sakte hain — bina "file not found" ke.
+
+Step 1: Environment Setup Karein
+- `python -m venv .venv`
+- Activate: `.\.venv\Scripts\Activate.ps1` (Windows) ya `source .venv/bin/activate` (Mac/Linux)
+- `pip install -r requirements.txt`
+  (requirements.txt mein ab kagglehub bhi add hai — pehle missing tha, jiski
+  wajah se prepare_data.py fail ho sakta tha)
+
+Step 2: API Key Configure Karein
+Project ROOT folder mein (jahan requirements.txt hai) ek `.env` file banayein:
+GEMINI_API_KEY=your_key_here
+
+Step 3: Data Prepare Karein
+Jahan bhi ye files hon (root ya src/), wahin se seedha run karein:
+- `python prepare_data.py`
+- `python data_prep.py`
+Dono ab CSV ko hamesha project root mein hi dhoondhte/save karte hain, chahe
+aap kisi bhi folder se command chalayein.
+
+Step 4: Preflight Check (pehle yeh zaroor karein)
+- `python eval.py --preflight-only`
+Agar yeh FAIL ho, toh full evaluation mat chalayein — pehle print hui wajah
+(galat/missing API key, ya rate limit) fix karein. "Preflight OK" dikhne ke
+baad hi Step 5 par jayein.
+
+Step 5: Evaluation Run Karein
+- `python eval.py`  → default 10 rows
+- Poora golden set: `python eval.py --n 0`
+- Agar 429 (rate limit) baar-baar aaye: `python eval.py --sleep 20`
+
+Result padhte waqt: final_eval_results.json ke har row mein ab "Row_Status"
+field hai — "OK" (real result), "AGENT_FAILED", ya "JUDGE_FAILED". Report ke
+liye sirf "OK" wale rows ka average lein; failed rows ka "Error" field batata
+hai asal wajah kya thi.
